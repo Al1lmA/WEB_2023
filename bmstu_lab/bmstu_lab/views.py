@@ -39,10 +39,14 @@ def GetOrders(request):
         input_text = request.GET['txt']
         if input_text:
             orders = [order for order in database if input_text.lower() in order['title'].lower()]
-        return render(request, 'orders.html', {'data':{'orders':orders}})
+        return render(request, 'orders.html', {'data':{
+            'orders':orders,
+            'search' : input_text
+            }})
     except:
         return render(request, 'orders.html', {'data' : {
-            'orders': database
+            'orders': database,
+            'search' : input_text
         }})
 
 def GetOrder(request, id):
