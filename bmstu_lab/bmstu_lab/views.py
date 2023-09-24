@@ -46,7 +46,6 @@ def GetOrders(request):
     except:
         return render(request, 'orders.html', {'data' : {
             'orders': database,
-            'search' : input_text
         }})
 
 def GetOrder(request, id):
