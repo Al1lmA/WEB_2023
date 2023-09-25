@@ -76,9 +76,14 @@ viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
     </div>
     <div class="flip-box-back text-center" style="background-image: url({{order.img}});">
         <div class="inner color-white">
+
+        <form action="{% url 'card_remove_url' order.bank_service_id %}">
+            <button class="button-type2 type2">Удалить</button>
+        </form>
+
         <h3 class="flip-box-header">{{ order.title }}</h3>
-        <p>{{ order.short_text}}</p>
-        <form action="{% url 'order_url' order.id %}">
+        <p>{{ order.short_description}}</p>
+        <form action="{% url 'order_url' order.bank_service_id %}">
             <button class="flip-box-button">{{ order.button_text }}</button>
         </form>
         </div>

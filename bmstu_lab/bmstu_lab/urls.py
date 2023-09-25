@@ -16,13 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from bmstu_lab import views
+from app import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # path('hello/', views.hello),
-    path('', views.GetOrders),
+    path('', views.GetOrders, name='order_url'),
     path('order/<int:id>/', views.GetOrder, name='order_url'),
+    path('update/<int:id>/', views.ClickRemoveButton, name='card_remove_url'),
 ]
 
 
