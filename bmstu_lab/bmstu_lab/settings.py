@@ -37,7 +37,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'app',
+    
+    # DRF
+    'rest_framework',
+
+    # Наше приложение
+    'bank_services',
 ]
 
 MIDDLEWARE = [
@@ -77,7 +82,7 @@ WSGI_APPLICATION = 'bmstu_lab.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'bank',
+        'NAME': 'bank_services',
         'USER': 'admin',
         'PASSWORD': '123',
         'HOST': 'localhost',
@@ -119,8 +124,6 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
-
-STATICFILES_DIRS = [BASE_DIR / "bmstu_lab/static"]
 
 STATIC_URL = '/bmstu_lab/static/'
 
