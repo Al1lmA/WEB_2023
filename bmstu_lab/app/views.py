@@ -6,8 +6,6 @@ from . import models
 
 #Договоры банка. Услуги - набор услуг банка, заявки - заявка на подключение к обслуживанию
 
-    # {'id' : 4, 'title' : 'Инвестиции', 'button-text' : 'Открыть брокерский счёт', 'description' : ''},
-
 def GetOrders(request):
     try:
         input_text = request.GET['txt']
