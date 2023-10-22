@@ -30,7 +30,6 @@ class Requests(models.Model):
     admin = models.ForeignKey('Users', models.DO_NOTHING, related_name='requests_admin_set', blank=True, null=True)
 
 
-
 class RequestsServices(models.Model):
     bank_service = models.ForeignKey('BankServices', models.DO_NOTHING)  # The composite primary key (bank_service_id, request_id) found, that is not supported. The first column is selected.
     request = models.ForeignKey('Requests', models.DO_NOTHING)
