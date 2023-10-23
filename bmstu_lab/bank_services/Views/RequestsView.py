@@ -7,7 +7,6 @@ from ..models import *
 from rest_framework.decorators import api_view
 from ..filters import *
 from datetime import datetime
-from datetime import date
 # Create your views here.
 
 def checkStatus(old_status, new_status, admin):

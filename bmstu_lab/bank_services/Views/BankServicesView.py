@@ -71,7 +71,7 @@ def services_detail(request, pk, format=None):
         """
         Обновляет информацию об услуге
         """
-        fields = request.data.keys()
+        # fields = request.data.keys()
 
         if request.data.get('service_status'):
             return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -81,8 +81,8 @@ def services_detail(request, pk, format=None):
 
         if serializer.is_valid():
             serializer.save()
-            if 'image' in fields:
-                putServiceImage(request, serializer)
+            # if 'image' in fields:
+            #     putServiceImage(request, serializer)
             return Response(serializer.data)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

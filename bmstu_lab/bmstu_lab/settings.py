@@ -131,3 +131,7 @@ STATIC_URL = '/bmstu_lab/static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+ADMINS = (
+  ('admin', 'zhdanova.yana2003@yandex.ru'),
+)
