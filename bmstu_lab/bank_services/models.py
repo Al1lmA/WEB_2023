@@ -31,14 +31,14 @@ class Requests(models.Model):
 
 
 class RequestsServices(models.Model):
-    bank_service = models.ForeignKey('BankServices', models.DO_NOTHING)  # The composite primary key (bank_service_id, request_id) found, that is not supported. The first column is selected.
-    request = models.ForeignKey('Requests', models.DO_NOTHING)
+    bank_service_id = models.ForeignKey('BankServices', models.DO_NOTHING)  # The composite primary key (bank_service_id, request_id) found, that is not supported. The first column is selected.
+    request_id = models.ForeignKey('Requests', models.DO_NOTHING)
     bill = models.CharField(blank=True, null=True, max_length=100)
     rs_id = models.AutoField(primary_key=True)
 
 
     class Meta:
-        unique_together = (('bank_service', 'request'),)
+        unique_together = (('bank_service_id', 'request_id'),)
 
 
 class Users(models.Model):
