@@ -23,9 +23,9 @@ class BankServices(models.Model):
 class Requests(models.Model):
     request_id = models.AutoField(primary_key=True)
     request_status = models.CharField(max_length=20, default='черновик')  # This field type is a guess.
-    creation_date = models.DateField(blank=True, null=True)
-    formation_date = models.DateField(blank=True, null=True)
-    completion_date = models.DateField(blank=True, null=True)
+    creation_date = models.DateTimeField(blank=True, null=True)
+    formation_date = models.DateTimeField(blank=True, null=True)
+    completion_date = models.DateTimeField(blank=True, null=True)
     user = models.ForeignKey('Users', models.DO_NOTHING, blank=True, null=True)
     admin = models.ForeignKey('Users', models.DO_NOTHING, related_name='requests_admin_set', blank=True, null=True)
 

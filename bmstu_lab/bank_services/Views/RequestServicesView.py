@@ -12,7 +12,7 @@ def GetUser():
     return 2
 
 @api_view(['Put','Delete'])
-def Change_Fine(request, pk, format=None):
+def r_s_details(request, pk, format=None):
 
     userId = GetUser()
     Request = Requests.objects.filter(user=userId, request_status='черновик')

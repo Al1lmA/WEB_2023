@@ -15,7 +15,7 @@ def DateFilter(objects, request):
 def RequestsFilter(objects, request):
     return DateFilter(StatusFilter(objects,request),request)
 
-# def FinesFilter(objects, request):
-#     if request.query_params.get('title'):
-#         return objects.filter(title__icontains=request.query_params.get('title'))
-#     return objects
+def ServicesFilter(objects, request):
+    if request.query_params.get('title'):
+        return objects.filter(title__icontains=request.query_params.get('title'))
+    return objects

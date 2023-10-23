@@ -29,7 +29,7 @@ def GetUser():
 
 
 @api_view(['Get','Post'])
-def fines_action(request, format=None):
+def services_list_form(request, format=None):
     if request.method == 'GET':
         """
         Возвращает список услуг
@@ -60,7 +60,7 @@ def fines_action(request, format=None):
 
 
 @api_view(['Get', 'Put', 'Delete', 'Post'])
-def fine_action(request, pk, format=None):
+def services_detail(request, pk, format=None):
     if request.method == 'GET':
         """
         Возвращает одну услугу
@@ -111,7 +111,7 @@ def fine_action(request, pk, format=None):
         if len(Request) == 0:
             Request_new = {}
             Request_new['user'] = userId
-            Request_new['admin'] = 7
+            Request_new['admin'] = 1
             serializer = RequestsSerializer(data=Request_new)
 
             if serializer.is_valid():

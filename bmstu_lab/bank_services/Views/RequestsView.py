@@ -7,6 +7,7 @@ from ..models import *
 from rest_framework.decorators import api_view
 from ..filters import *
 from datetime import datetime
+from datetime import date
 # Create your views here.
 
 def checkStatus(old_status, new_status, admin):
@@ -16,7 +17,7 @@ def GetUser():
     return 2
 
 @api_view(['Get','Put'])
-def requests_list(request, format=None):
+def request_list_form(request, format=None):
     if request.method == 'GET':
         """
         Возвращает список заявок
@@ -32,22 +33,24 @@ def requests_list(request, format=None):
         Формирует заявку
         """
         userId = GetUser()
-        User = Users.objects.filter(user_id=userId)
+        User = get_object_or_404(Users, user_id=userId)
         Request = get_object_or_404(Requests, user=userId, request_status='черновик')
         new_status = "сформирован"
+        print(Request.request_status)   
 
-        if checkStatus(Request.request_status, new_status, User.admin_flag):                            #flag
+        if checkStatus(Request.request_status, new_status, User.admin_flag): 
+            print("hi")                        
             Request.request_status = new_status
             Request.formation_date = datetime.now()
             Request.save()
             serializer = RequestsSerializer(Request)
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
-        
+         
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['Get','Put','Delete'])
-def breach_action(request, pk, format=None):
+def request_detail(request, pk, format=None):
     if request.method == 'GET':
         """
         Возвращает одну заявку
@@ -97,17 +100,19 @@ def breach_action(request, pk, format=None):
 
     
 @api_view(['Put'])
-def breach_final(request, pk, format=None):
+def request_final(request, pk, format=None):
         """
         Принимает или отклоняет заявку
         """
 
-        userId = GetUser()
-        User = Users.objects.get(user_id=userId)
-        Request = get_object_or_404(Requests, breach_id=pk)
+        userId = 1
+        User = get_object_or_404(Users, user_id=userId)
+        Request = get_object_or_404(Requests, request_id=pk)
+
 
         try: 
-            new_status = request.data['status']
+            new_status = request.data['request_status']
+            print(new_status)
         except:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         
@@ -116,6 +121,7 @@ def breach_final(request, pk, format=None):
             Request.completion_date = datetime.now()
             Request.save()
             serializer = RequestsSerializer(Request)
+            print(new_status)
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         
         return Response(status=status.HTTP_400_BAD_REQUEST)
