@@ -14,7 +14,7 @@ from minio import Minio
 class MinioClass:
     def __init__(self):
         try:
-            self.client = Minio(endpoint="192.168.100.180:9000",
+            self.client = Minio(endpoint="192.168.19.156:9000",
                                 access_key='minioadmin',
                                 secret_key='minioadmin',
                                 secure=False)
@@ -77,8 +77,3 @@ class MinioClass:
             print(f'[{info_bucket}] Бакет "{bucket_name}" существует')
         else:
             print(f'[{info_bucket}] Бакет "{bucket_name}" не существует')
-
-
-
-DB = MinioClass()
-DB.check_bucket_exists(bucket_name='bankservices')

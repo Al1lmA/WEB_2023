@@ -21,7 +21,7 @@ def postServiceImage(request, serializer: BankServicesSerializer):
 
 def putServiceImage(request, serializer: BankServicesSerializer):
     minio = MinioClass()
-    minio.removeImage('bankservices', serializer.data['bank_service_id'], serializer.data['picture'])
+    minio.removeImage('bankservices', serializer.data['bank_service_id'], serializer.data['img'])
     minio.addImage('bankservices', serializer.data['bank_service_id'], request.data['image'], serializer.data['img'])
 
 def GetUser():
@@ -71,7 +71,7 @@ def services_detail(request, pk, format=None):
         """
         Обновляет информацию об услуге
         """
-        # fields = request.data.keys()
+        fields = request.data.keys()
 
         if request.data.get('service_status'):
             return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -81,8 +81,8 @@ def services_detail(request, pk, format=None):
 
         if serializer.is_valid():
             serializer.save()
-            # if 'image' in fields:
-            #     putServiceImage(request, serializer)
+            if 'image' in fields:
+                putServiceImage(request, serializer)
             return Response(serializer.data)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -103,10 +103,11 @@ def services_detail(request, pk, format=None):
         Добавляет услугу в заявку
         """ 
 
-        userId = GetUser()
-        Request = Requests.objects.filter(user=userId, request_status='черновик')
-        Request_id = Request.request_id
-        if len(Request) == 0:
+        userId = 3
+        try:
+            Request = Requests.objects.get(user=userId, request_status='черновик')
+            Request_id = Request.request_id
+        except Requests.DoesNotExist:
             Request_new = {}
             Request_new['user'] = userId
             Request_new['admin'] = 1
