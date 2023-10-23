@@ -9,20 +9,20 @@ from ..filters import *
 from ..minio.minioClass import *
 # Create your views here.
 
-# def getFineWithImage(serializer):
-#     minio = MinioClass()
-#     FineData = serializer.data
-#     FineData['image'] = minio.getImage('fines', serializer.data['fine_id'], serializer.data['picture'])
-#     return FineData
+def getServiceWithImage(serializer: BankServicesSerializer):
+    minio = MinioClass()
+    ServiceData = serializer.data
+    ServiceData['image'] = minio.getImage('bankservices', serializer.data['bank_service_id'], serializer.data['img'])
+    return ServiceData
 
-# def postFineImage(request, serializer: FinesSerializer):
-#     minio = MinioClass()
-#     minio.addImage('fines', serializer.data['fine_id'], request.data['image'], serializer.data['picture'])
+def postServiceImage(request, serializer: BankServicesSerializer):
+    minio = MinioClass()
+    minio.addImage('bankservices', serializer.data['bank_service_id'], request.data['image'], serializer.data['img'])
 
-# def putFineImage(request, serializer: FinesSerializer):
-#     minio = MinioClass()
-#     minio.removeImage('fines', serializer.data['fine_id'], serializer.data['picture'])
-#     minio.addImage('fines', serializer.data['fine_id'], request.data['image'], serializer.data['picture'])
+def putServiceImage(request, serializer: BankServicesSerializer):
+    minio = MinioClass()
+    minio.removeImage('bankservices', serializer.data['bank_service_id'], serializer.data['picture'])
+    minio.addImage('bankservices', serializer.data['bank_service_id'], request.data['image'], serializer.data['img'])
 
 def GetUser():
     return 2
@@ -35,24 +35,21 @@ def services_list_form(request, format=None):
         Возвращает список услуг
         """
 
-        # print('get')
-
         ServicesFilteredList = ServicesFilter(BankServices.objects.filter(service_status='действует'), request)
-        # FinesListData = [getFineWithImage(FinesSerializer(Fine)) for Fine in FinesList]
-        serializer = BankServicesSerializer(ServicesFilteredList, many=True)
-        return Response(serializer.data)
+        ServicesFilteredListData = [getServiceWithImage(BankServicesSerializer(Service)) for Service in ServicesFilteredList]
+        # serializer = BankServicesSerializer(ServicesFilteredList, many=True)
+        return Response(ServicesFilteredListData)
     
     elif request.method == 'POST':
         """
         Добавляет новую услугу
         """
 
-        # print('post')
-
         serializer = BankServicesSerializer(data=request.data)
 
         if serializer.is_valid():
             serializer.save()
+            postServiceImage(request, serializer)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -67,15 +64,14 @@ def services_detail(request, pk, format=None):
         """
 
         Service = get_object_or_404(BankServices, service_id=pk)
-
-        if request.method == 'GET':
-            serializer = BankServicesSerializer(Service)
-            return Response(serializer.data)
+        serializer = BankServicesSerializer(Service)
+        return Response(getServiceWithImage(serializer), status=status.HTTP_202_ACCEPTED)
         
     elif request.method == 'PUT':
         """
         Обновляет информацию об услуге
         """
+        fields = request.data.keys()
 
         if request.data.get('service_status'):
             return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -85,6 +81,8 @@ def services_detail(request, pk, format=None):
 
         if serializer.is_valid():
             serializer.save()
+            if 'image' in fields:
+                putServiceImage(request, serializer)
             return Response(serializer.data)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

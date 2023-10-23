@@ -15,8 +15,8 @@ class BankServices(models.Model):
     button_text = models.CharField(blank=True, null=True)
     short_description = models.CharField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
-    img = models.CharField(blank=True, null=True)
-    order_img = models.CharField(blank=True, null=True)
+    img = models.CharField(blank=True, null=True, max_length=10, default='jpg')
+    order_img = models.CharField(blank=True, null=True, max_length=10, default='jpg')
     service_status = models.CharField(max_length=20, default='действует')  # This field type is a guess.
 
 
