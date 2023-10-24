@@ -15,7 +15,7 @@ def checkStatus(old_status, new_status, admin):
 def GetUser():
     return 2
 
-@api_view(['Get','Put'])
+@api_view(['Get', 'Put', 'Delete'])
 def request_list_form(request, format=None):
     if request.method == 'GET':
         """
@@ -31,6 +31,7 @@ def request_list_form(request, format=None):
         """
         Формирует заявку
         """
+
         userId = GetUser()
         User = get_object_or_404(Users, user_id=userId)
         Request = get_object_or_404(Requests, user=userId, request_status='черновик')
@@ -43,12 +44,25 @@ def request_list_form(request, format=None):
             Request.formation_date = datetime.now()
             Request.save()
             serializer = RequestsSerializer(Request)
-            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
-         
+            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)         
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    
+    elif request.method == 'DELETE':
+        """
+        Удаляет заявку
+        """
+
+        userId = GetUser()
+        User = Users.objects.get(user_id=userId)
+        Request = get_object_or_404(Requests, user=userId, requests_status='черновик')
+
+        if checkStatus(Request.request_status, "удалён", User.admin_flag):
+            Request.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)        
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['Get','Put','Delete'])
+@api_view(['Get', 'Put'])
 def request_detail(request, pk, format=None):
     if request.method == 'GET':
         """
@@ -81,21 +95,6 @@ def request_detail(request, pk, format=None):
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    elif request.method == 'DELETE':
-        """
-        Удаляет заявку
-        """
-
-        userId = GetUser()
-        User = Users.objects.get(user_id=userId)
-        Request = get_object_or_404(Requests, user=userId, requests_status='черновик')
-
-        if checkStatus(Request.request_status, "удалён", User.admin_flag):
-            Request.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        
-        return Response(status=status.HTTP_400_BAD_REQUEST)
 
     
 @api_view(['Put'])
@@ -120,7 +119,5 @@ def request_final(request, pk, format=None):
             Request.completion_date = datetime.now()
             Request.save()
             serializer = RequestsSerializer(Request)
-            print(new_status)
-            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
-        
+            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)        
         return Response(status=status.HTTP_400_BAD_REQUEST)

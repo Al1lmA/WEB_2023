@@ -7,6 +7,7 @@ from ..models import *
 from rest_framework.decorators import api_view
 from ..filters import *
 from ..minio.minioClass import *
+from datetime import datetime
 # Create your views here.
 
 def getServiceWithImage(serializer: BankServicesSerializer):
@@ -104,30 +105,32 @@ def services_detail(request, pk, format=None):
         """ 
 
         userId = 3
-        try:
-            Request = Requests.objects.get(user=userId, request_status='черновик')
-            Request_id = Request.request_id
-        except Requests.DoesNotExist:
-            Request_new = {}
-            Request_new['user'] = userId
-            Request_new['admin'] = 1
-            serializer = RequestsSerializer(data=Request_new)
-
-            if serializer.is_valid():
-                serializer.save()
-            else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            
-        if (Request.objects.get(request_id=Request_id).status != 'черновик') or (len(RequestsServices.objects.filter(bank_service_id=pk).filter(Request_id=Request_id)) != 0):
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        Request = Requests.objects.filter(user_id = userId).filter(request_status = 'черновик') 
         
-        r_s_new = {}
-        r_s_new['sbank_service_id'] = pk
-        r_s_new['request_id'] = Request_id
-        r_s_new['bill'] = 'bill number (in future)'
+        if not Request.exists():
+            RequestNew = {
+                'user': userId,
+                'moder_id': 1,
+                'creation_date': datetime.now(),
+            }
+            RequestSerializer = RequestsSerializer(data=RequestNew)
 
-        serializer = ManyToManySerializer(data=r_s_new)
-
+            if not RequestSerializer.is_valid():
+                return Response(RequestSerializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
+            RequestSerializer.save()
+        else:
+            Request_id = Request[0].request_id
+        
+        if Requests.objects.get(request_id=Request_id).request_status != 'черновик' or RequestsServices.objects.filter(bank_service_id=pk).filter(reques_id=Request_id).exists():
+            return Response({'error': 'Bad request'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        NewRS = {
+            'bank_service_id': pk,
+            'request_id': Request_id,
+            'bill': 'New number',
+        }
+        serializer = ManyToManySerializer(data=NewRS)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)

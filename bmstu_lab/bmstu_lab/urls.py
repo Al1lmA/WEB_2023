@@ -28,9 +28,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include(router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    # path('', views.GetOrders, name='order_url'),
-    # path('order/<int:id>/', views.GetOrder, name='order_url'),
-    # path('update/<int:id>/', views.ClickRemoveButton, name='card_remove_url'),
 
     path(r'services/', services_list_form, name='services_list_form'),
     path(r'services/<int:pk>/', services_detail, name='services_detail'),
@@ -40,7 +37,6 @@ urlpatterns = [
     path(r'requests/<int:pk>/end/', request_final, name='request_final'),
 
     path(r'r_s/<int:pk>/', r_s_details, name='r_s_details'),
-
 ]
 
 
