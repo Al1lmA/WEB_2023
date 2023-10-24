@@ -34,7 +34,7 @@ urlpatterns = [
 
     path(r'requests/', request_list_form, name='request_list_form'),
     path(r'requests/<int:pk>/', request_detail, name='request_detail'),
-    path(r'requests/<int:pk>/end/', request_final, name='request_final'),
+    path(r'requests/<int:pk>/finally/', request_final, name='request_final'),
 
     path(r'r_s/<int:pk>/', r_s_details, name='r_s_details'),
 ]

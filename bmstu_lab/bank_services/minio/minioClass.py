@@ -14,7 +14,7 @@ from minio import Minio
 class MinioClass:
     def __init__(self):
         try:
-            self.client = Minio(endpoint="192.168.85.156:9000",
+            self.client = Minio(endpoint="192.168.100.180:9000",
                                 access_key='minioadmin',
                                 secret_key='minioadmin',
                                 secure=False)

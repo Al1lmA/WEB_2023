@@ -20,7 +20,7 @@ class RequestsServicesSerializer(serializers.ModelSerializer):
         # Модель, которую мы сериализуем
         model = RequestsServices
         # Поля, которые мы сериализуем
-        fields = ["bank_service", "request", "bill", "rs_id"]
+        fields = ["bank_service_id", "request_id", "bill", "rs_id"]
 
 class UsersSerializer(serializers.ModelSerializer):
     class Meta:

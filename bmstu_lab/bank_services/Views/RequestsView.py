@@ -57,7 +57,6 @@ def request_list_form(request, format=None):
         print(Request.request_status)   
 
         if checkStatus(Request.request_status, new_status, User.admin_flag): 
-            print("hi")                        
             Request.request_status = new_status
             Request.formation_date = datetime.now()
             Request.save()
