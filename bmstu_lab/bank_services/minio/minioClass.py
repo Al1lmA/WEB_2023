@@ -9,8 +9,6 @@ from minio import Minio
 
 # опциональный параметр, отвечающий за вкл/выкл защищенное TLS соединение
 
-
-
 class MinioClass:
     def __init__(self):
         try:
