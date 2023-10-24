@@ -7,10 +7,28 @@ from ..models import *
 from rest_framework.decorators import api_view
 from ..filters import *
 from datetime import datetime
+from ..minio.minioClass import *
+
 # Create your views here.
 
 def checkStatus(old_status, new_status, admin):
     return ((not admin) and (new_status in ['сформирован', 'удалён']) and (old_status == 'черновик')) or (admin and (new_status in ['завершён', 'отклонён']) and (old_status == 'сформирован')) 
+
+def getServiceWithImage(serializer: ManyToManySerializer, bank_service_id: int, img: str):
+    minio = MinioClass()
+    ServiceData = serializer.data
+    ServiceData['image'] = minio.getImage('bankservices', bank_service_id, img)
+    return ServiceData
+
+def getServicesForOneRequest(serializer: ManyToManySerializer):
+    ServiceList = []
+    for service in serializer.data:
+        Service = get_object_or_404(BankServices, bank_service_id=service['bank_service_id'])
+        ServiceData = service
+        ServiceData['service_data'] = getServiceWithImage(ServiceForRequest(Service), Service.bank_service_id, Service.img)
+        ServiceList.append(ServiceData)
+    return ServiceList
+
 
 def GetUser():
     return 2
@@ -76,7 +94,7 @@ def request_detail(request, pk, format=None):
         positionsSerializer = ManyToManySerializer(positions, many=True)
 
         response = serializer.data
-        response['positions'] = positionsSerializer.data
+        response["request's services"] = getServicesForOneRequest(positionsSerializer)
         return Response(response, status=status.HTTP_202_ACCEPTED)
     
     elif request.method == 'PUT':

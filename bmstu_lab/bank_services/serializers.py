@@ -32,4 +32,11 @@ class UsersSerializer(serializers.ModelSerializer):
 class ManyToManySerializer(serializers.ModelSerializer):
     class Meta:
         model = RequestsServices
-        fields = ["bill","bank_service"]
+        fields = ["bill", "bank_service_id"]
+
+class ServiceForRequest(serializers.ModelSerializer):
+    class Meta:
+        # Модель, которую мы сериализуем
+        model = BankServices
+        # Поля, которые мы сериализуем
+        fields = ["title", "button_text", "short_description", "description"]

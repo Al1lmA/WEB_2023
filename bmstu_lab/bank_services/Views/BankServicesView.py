@@ -93,7 +93,7 @@ def services_detail(request, pk, format=None):
         Удаляет услугу
         """  
 
-        Service = get_object_or_404(BankServices, service_status=pk)
+        Service = get_object_or_404(BankServices, bank_service_id=pk)
         Service.service_status = request.data['service_status']
         Service.save()
         serializer = BankServicesSerializer(Service)

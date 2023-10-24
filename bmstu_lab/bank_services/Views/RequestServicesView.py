@@ -16,7 +16,7 @@ def r_s_details(request, pk, format=None):
 
     userId = GetUser()
     Request = Requests.objects.filter(user=userId, request_status='черновик')
-    Request_id = Request.request_id
+    Request_id = Request[0].request_id
     r_s = RequestsServices.objects.filter(bank_service_id=pk).filter(request_id=Request_id)
 
     if request.method == 'DELETE':
