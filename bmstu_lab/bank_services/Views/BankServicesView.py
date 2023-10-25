@@ -122,7 +122,7 @@ def services_detail(request, pk, format=None):
         else:
             Request_id = Request[0].request_id
         
-        if Requests.objects.get(request_id=Request_id).request_status != 'черновик' or RequestsServices.objects.filter(bank_service_id=pk).filter(reques_id=Request_id).exists():
+        if Requests.objects.get(request_id=Request_id).request_status != 'черновик' or RequestsServices.objects.filter(bank_service_id=pk).filter(request_id=Request_id).exists():
             return Response({'error': 'Bad request'}, status=status.HTTP_400_BAD_REQUEST)
         
         NewRS = {
@@ -130,7 +130,7 @@ def services_detail(request, pk, format=None):
             'request_id': Request_id,
             'bill': 'New number',
         }
-        serializer = ManyToManySerializer(data=NewRS)
+        serializer = RequestsServicesSerializer(data=NewRS)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)

@@ -20,6 +20,9 @@ def r_s_details(request, pk, format=None):
     r_s = RequestsServices.objects.filter(bank_service_id=pk).filter(request_id=Request_id)
 
     if request.method == 'DELETE':
+        """
+        Удаление из заявки м-м
+        """
         if len(r_s) > 0:
             r_s[0].delete()
 
@@ -30,6 +33,9 @@ def r_s_details(request, pk, format=None):
         return Response(status=status.HTTP_400_BAD_REQUEST)
     
     elif request.method == 'PUT':
+        """
+        Изменение значения м-м
+        """
         if len(r_s) > 0:
             r_s[0].bill = request.data['bill']
             r_s[0].save()
