@@ -6,7 +6,6 @@ from ..serializers import *
 from ..models import *
 from rest_framework.decorators import api_view
 from ..filters import *
-# Create your views here.
 
 @api_view(['Post'])
 def postUser(request, format=None):    

@@ -9,8 +9,6 @@ from ..filters import *
 from datetime import datetime
 from ..minio.minioClass import *
 
-# Create your views here.
-
 def checkStatus(old_status, new_status, admin):
     return ((not admin) and (new_status in ['сформирован', 'удалён']) and (old_status == 'черновик')) or (admin and (new_status in ['завершён', 'отклонён']) and (old_status == 'сформирован')) 
 
@@ -30,9 +28,6 @@ def getServicesForOneRequest(serializer: ManyToManySerializer):
     return ServiceList
 
 
-def GetUser():
-    return 2
-
 @api_view(['Get', 'Put', 'Delete'])
 def request_list_form(request, format=None):
     if request.method == 'GET':
@@ -42,7 +37,14 @@ def request_list_form(request, format=None):
         
         RequestsFilteredList = RequestsFilter(Requests.objects.all(), request)
         serializer = RequestsSerializer(RequestsFilteredList, many=True)
-        return Response(serializer.data)
+
+        RequestData = serializer.data
+
+        for obj, i in enumerate(serializer.data):
+            user = get_object_or_404(Users, user_id=obj.get('user'))
+            RequestData[i]['user_login'] = user.login
+            
+        return Response(RequestData, status=status.HTTP_202_ACCEPTED)
     
 
     elif request.method == 'PUT':
@@ -50,7 +52,7 @@ def request_list_form(request, format=None):
         Формирует заявку
         """
 
-        userId = GetUser()
+        userId = 2
         User = get_object_or_404(Users, user_id=userId)
         Request = get_object_or_404(Requests, user=userId, request_status='черновик')
         new_status = "сформирован"
@@ -69,11 +71,19 @@ def request_list_form(request, format=None):
         Удаляет заявку
         """
 
-        userId = GetUser()
+        userId = 2
         User = Users.objects.get(user_id=userId)
-        Request = get_object_or_404(Requests, user=userId, requests_status='черновик')
+        Request = Requests.objects.filter(user=userId).filter(request_status='черновик')
+
+        if Request.exists():
+            RequestId = Request[0].request_id
+
+        NeedRS = RequestsServices.objects.filter(request_id=RequestId)        
 
         if checkStatus(Request.request_status, "удалён", User.admin_flag):
+            for obj in NeedRS:
+                obj.delete()
+                
             Request.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)        
         return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -93,6 +103,7 @@ def request_detail(request, pk, format=None):
         positionsSerializer = ManyToManySerializer(positions, many=True)
 
         response = serializer.data
+        response['user_login'] = Users.objects.get(user_id=response['user']).login
         response["request's services"] = getServicesForOneRequest(positionsSerializer)
         return Response(response, status=status.HTTP_202_ACCEPTED)
     

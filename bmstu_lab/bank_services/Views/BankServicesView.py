@@ -8,7 +8,6 @@ from rest_framework.decorators import api_view
 from ..filters import *
 from ..minio.minioClass import *
 from datetime import datetime
-# Create your views here.
 
 def getServiceWithImage(serializer: BankServicesSerializer):
     minio = MinioClass()
@@ -25,9 +24,6 @@ def putServiceImage(request, serializer: BankServicesSerializer):
     minio.removeImage('bankservices', serializer.data['bank_service_id'], serializer.data['img'])
     minio.addImage('bankservices', serializer.data['bank_service_id'], request.data['image'], serializer.data['img'])
 
-def GetUser():
-    return 2
-
 
 @api_view(['Get','Post'])
 def services_list_form(request, format=None):
@@ -35,11 +31,22 @@ def services_list_form(request, format=None):
         """
         Возвращает список услуг
         """
+        userId = 2
+        Request = Requests.objects.filter(user_id = userId).filter(request_status = 'черновик') 
+        if Request.exists():
+            Request_id = Request[0].request_id
+        else:
+            Request_id = 'null'
 
+        CurrentList = {
+            'request_id': Request_id
+        }
+        
         ServicesFilteredList = ServicesFilter(BankServices.objects.filter(service_status='действует'), request)
         ServicesFilteredListData = [getServiceWithImage(BankServicesSerializer(Service)) for Service in ServicesFilteredList]
         # serializer = BankServicesSerializer(ServicesFilteredList, many=True)
-        return Response(ServicesFilteredListData)
+        CurrentList['services_list'] =  ServicesFilteredListData
+        return Response(CurrentList)
     
     elif request.method == 'POST':
         """
@@ -72,19 +79,19 @@ def services_detail(request, pk, format=None):
         """
         Обновляет информацию об услуге
         """
-        fields = request.data.keys()
+        fields = request.data
 
         if request.data.get('service_status'):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         
-        Service = get_object_or_404(BankServices, service_id=pk)
+        Service = get_object_or_404(BankServices, bank_service_id=pk)
         serializer = BankServicesSerializer(Service, data=request.data, partial=True)
 
         if serializer.is_valid():
             serializer.save()
             if 'image' in fields:
                 putServiceImage(request, serializer)
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -119,11 +126,13 @@ def services_detail(request, pk, format=None):
                 return Response(RequestSerializer.errors, status=status.HTTP_400_BAD_REQUEST)
             
             RequestSerializer.save()
-        else:
-            Request_id = Request[0].request_id
         
+        
+        NewRequest = Requests.objects.filter(user_id = userId).filter(request_status = 'черновик') 
+        Request_id = NewRequest[0].request_id
+
         if Requests.objects.get(request_id=Request_id).request_status != 'черновик' or RequestsServices.objects.filter(bank_service_id=pk).filter(request_id=Request_id).exists():
-            return Response({'error': 'Bad request'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Услуга уже добавлена в заявку'}, status=status.HTTP_400_BAD_REQUEST)
         
         NewRS = {
             'bank_service_id': pk,

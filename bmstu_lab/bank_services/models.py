@@ -45,6 +45,7 @@ class Users(models.Model):
     user_id = models.AutoField(primary_key=True)
     name = models.CharField(blank=True, null=True)
     surname = models.CharField(blank=True, null=True)
+    login = models.CharField(blank=True, null=True)
     password = models.CharField(blank=True, null=True)
     phone_number = models.CharField(blank=True, null=True)
     admin_flag = models.BooleanField(blank=True, null=True)

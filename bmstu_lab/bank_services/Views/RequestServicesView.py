@@ -6,15 +6,11 @@ from ..serializers import *
 from ..models import *
 from rest_framework.decorators import api_view
 from ..filters import *
-# Create your views here.
-
-def GetUser():
-    return 2
 
 @api_view(['Put','Delete'])
 def r_s_details(request, pk, format=None):
 
-    userId = GetUser()
+    userId = 2
     Request = Requests.objects.filter(user=userId, request_status='черновик')
     Request_id = Request[0].request_id
     r_s = RequestsServices.objects.filter(bank_service_id=pk).filter(request_id=Request_id)
