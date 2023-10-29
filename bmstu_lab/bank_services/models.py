@@ -15,14 +15,14 @@ class BankServices(models.Model):
     button_text = models.CharField(blank=True, null=True)
     short_description = models.CharField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
-    img = models.CharField(blank=True, null=True, max_length=10, default='jpg')
-    order_img = models.CharField(blank=True, null=True, max_length=10, default='jpg')
-    service_status = models.CharField(max_length=20, default='действует')  # This field type is a guess.
+    img = models.CharField(blank=True, null=True)
+    order_img = models.CharField(blank=True, null=True)
+    service_status = models.CharField(max_length=20, default='действует')  
 
 
 class Requests(models.Model):
     request_id = models.AutoField(primary_key=True)
-    request_status = models.CharField(max_length=20, default='черновик')  # This field type is a guess.
+    request_status = models.CharField(max_length=20, default='черновик')
     creation_date = models.DateTimeField(blank=True, null=True)
     formation_date = models.DateTimeField(blank=True, null=True)
     completion_date = models.DateTimeField(blank=True, null=True)
@@ -31,7 +31,7 @@ class Requests(models.Model):
 
 
 class RequestsServices(models.Model):
-    bank_service_id = models.ForeignKey('BankServices', models.DO_NOTHING)  # The composite primary key (bank_service_id, request_id) found, that is not supported. The first column is selected.
+    bank_service_id = models.ForeignKey('BankServices', models.DO_NOTHING) 
     request_id = models.ForeignKey('Requests', models.DO_NOTHING)
     bill = models.CharField(blank=True, null=True, max_length=100)
     rs_id = models.AutoField(primary_key=True)

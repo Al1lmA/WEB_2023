@@ -3,6 +3,9 @@ from minio.error import S3Error
 from io import BytesIO
 from base64 import b64encode, b64decode
 import os
+import pip._vendor.requests as requests
+import io
+from datetime import timedelta
 
 
 from minio import Minio
@@ -12,7 +15,7 @@ from minio import Minio
 class MinioClass:
     def __init__(self):
         try:
-            self.client = Minio(endpoint="192.168.85.156:9000",
+            self.client = Minio(endpoint="192.168.100.187:9000",
                                 access_key='minioadmin',
                                 secret_key='minioadmin',
                                 secure=False)
@@ -37,33 +40,38 @@ class MinioClass:
         except Exception as e:
             print("unexpected error: ", e)
 
-    def addImage(self, username: str, image_id: str, image_base64: str, image_extension: str):
+    def addImage(self, bucket: str, title: str, image_url: str):
         try:
-            image_data = b64decode(image_base64)
-            image_stream = BytesIO(image_data)
-            self.client.put_object(bucket_name=username,
-                                   object_name=f"{image_id}.{image_extension}",
+            response = requests.get(image_url)
+            image_stream = io.BytesIO(response.content)
+            self.client.put_object(bucket_name=bucket,
+                                   object_name=f"{title}.png",
                                    data=image_stream,
-                                   length=len(image_data))
+                                   length=len(response.content))
         except S3Error as e:
             print("minio error occurred: ", e)
         except Exception as e:
             print("unexpected error: ", e)
 
-    def getImage(self, username: str, image_id: str, image_extension: str):
+    def getImage(self, bucket: str, title: str):
         try:
-            result = self.client.get_object(bucket_name=username,
-                                            object_name=f"{image_id}.{image_extension}")
-            return b64encode(BytesIO(result.data).read()).decode()
+            result = self.client.get_presigned_url(
+                method='GET',
+                bucket_name=bucket,
+                object_name=f"{title}.png",
+                expires=timedelta(minutes=1),
+                )
+            # print (result)
+            return result
         except S3Error as e:
             print("minio error occurred: ", e)
         except Exception as e:
             print("unexpected error: ", e)
 
-    def removeImage(self, username: str, image_id: str, image_extension: str):
+    def removeImage(self, bucket: str, title: str):
         try:
-            self.client.remove_object(bucket_name=username,
-                                      object_name=f"{image_id}.{image_extension}")
+            self.client.remove_object(bucket_name=bucket,
+                                      object_name=f"{title}.png")
         except S3Error as e:
             print("minio error occurred: ", e)
         except Exception as e:

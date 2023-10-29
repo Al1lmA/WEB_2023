@@ -12,10 +12,10 @@ from ..minio.minioClass import *
 def checkStatus(old_status, new_status, admin):
     return ((not admin) and (new_status in ['сформирован', 'удалён']) and (old_status == 'черновик')) or (admin and (new_status in ['завершён', 'отклонён']) and (old_status == 'сформирован')) 
 
-def getServiceWithImage(serializer: ManyToManySerializer, bank_service_id: int, img: str):
+def getServiceWithImage(serializer: ManyToManySerializer, title):
     minio = MinioClass()
     ServiceData = serializer.data
-    ServiceData['image'] = minio.getImage('bankservices', bank_service_id, img)
+    ServiceData['image'] = minio.getImage('bankservices', title)
     return ServiceData
 
 def getServicesForOneRequest(serializer: ManyToManySerializer):
@@ -23,7 +23,7 @@ def getServicesForOneRequest(serializer: ManyToManySerializer):
     for service in serializer.data:
         Service = get_object_or_404(BankServices, bank_service_id=service['bank_service_id'])
         ServiceData = service
-        ServiceData['service_data'] = getServiceWithImage(ServiceForRequest(Service), Service.bank_service_id, Service.img)
+        ServiceData['service_data'] = getServiceWithImage(ServiceForRequest(Service), Service.title)
         ServiceList.append(ServiceData)
     return ServiceList
 
@@ -40,7 +40,7 @@ def request_list_form(request, format=None):
 
         RequestData = serializer.data
 
-        for obj, i in enumerate(serializer.data):
+        for i, obj in enumerate(serializer.data):
             user = get_object_or_404(Users, user_id=obj.get('user'))
             RequestData[i]['user_login'] = user.login
             

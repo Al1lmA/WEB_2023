@@ -12,17 +12,17 @@ from datetime import datetime
 def getServiceWithImage(serializer: BankServicesSerializer):
     minio = MinioClass()
     ServiceData = serializer.data
-    ServiceData['image'] = minio.getImage('bankservices', serializer.data['bank_service_id'], serializer.data['img'])
+    ServiceData.update({'image': minio.getImage('bankservices', serializer.data['title'])})
     return ServiceData
 
-def postServiceImage(request, serializer: BankServicesSerializer):
+def postServiceImage(serializer: BankServicesSerializer):
     minio = MinioClass()
-    minio.addImage('bankservices', serializer.data['bank_service_id'], request.data['image'], serializer.data['img'])
+    minio.addImage('bankservices', serializer.data['title'], serializer.data['img'])
 
-def putServiceImage(request, serializer: BankServicesSerializer):
+def putServiceImage(serializer: BankServicesSerializer, old_title):
     minio = MinioClass()
-    minio.removeImage('bankservices', serializer.data['bank_service_id'], serializer.data['img'])
-    minio.addImage('bankservices', serializer.data['bank_service_id'], request.data['image'], serializer.data['img'])
+    minio.removeImage('bankservices', old_title)
+    minio.addImage('bankservices', serializer.data['title'], serializer.data['img'])
 
 
 @api_view(['Get','Post'])
@@ -53,11 +53,16 @@ def services_list_form(request, format=None):
         Добавляет новую услугу
         """
 
+        Service = BankServices.objects.filter(title=request.data['title'])
+        if Service.exists():
+            return Response('Такая услуга уже существует', status=status.HTTP_400_BAD_REQUEST)
+        
         serializer = BankServicesSerializer(data=request.data)
+
 
         if serializer.is_valid():
             serializer.save()
-            postServiceImage(request, serializer)
+            postServiceImage(serializer)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -85,12 +90,13 @@ def services_detail(request, pk, format=None):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         
         Service = get_object_or_404(BankServices, bank_service_id=pk)
+        old_title = Service.title
         serializer = BankServicesSerializer(Service, data=request.data, partial=True)
 
         if serializer.is_valid():
             serializer.save()
-            if 'image' in fields:
-                putServiceImage(request, serializer)
+            putServiceImage(serializer, old_title)
+
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -101,7 +107,7 @@ def services_detail(request, pk, format=None):
         """  
 
         Service = get_object_or_404(BankServices, bank_service_id=pk)
-        Service.service_status = request.data['service_status']
+        Service.service_status = 'удалён'
         Service.save()
         serializer = BankServicesSerializer(Service)
         return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
