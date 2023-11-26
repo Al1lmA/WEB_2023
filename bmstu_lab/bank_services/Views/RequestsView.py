@@ -52,7 +52,7 @@ def request_list_form(request, format=None):
         Формирует заявку
         """
 
-        userId = 2
+        userId = 3
         User = get_object_or_404(Users, user_id=userId)
         Request = get_object_or_404(Requests, user=userId, request_status='черновик')
         new_status = "сформирован"

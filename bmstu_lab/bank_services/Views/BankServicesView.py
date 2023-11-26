@@ -76,7 +76,7 @@ def services_detail(request, pk, format=None):
         Возвращает одну услугу
         """
 
-        Service = get_object_or_404(BankServices, service_id=pk)
+        Service = get_object_or_404(BankServices, bank_service_id=pk)
         serializer = BankServicesSerializer(Service)
         return Response(getServiceWithImage(serializer), status=status.HTTP_202_ACCEPTED)
         

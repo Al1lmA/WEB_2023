@@ -11,11 +11,12 @@ from datetime import timedelta
 from minio import Minio
 
 # опциональный параметр, отвечающий за вкл/выкл защищенное TLS соединение
+# minio server ~/minio --console-address :9090
 
 class MinioClass:
     def __init__(self):
         try:
-            self.client = Minio(endpoint="192.168.100.187:9000",
+            self.client = Minio(endpoint="172.17.0.1:9000",
                                 access_key='minioadmin',
                                 secret_key='minioadmin',
                                 secure=False)
