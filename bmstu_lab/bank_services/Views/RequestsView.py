@@ -77,7 +77,7 @@ class Requests_View(APIView):
         new_status = "сформирован"
         print(Request.request_status)   
 
-        if checkStatus(Request.request_status, new_status, User.admin_flag): 
+        if checkStatus(Request.request_status, new_status, False): 
             Request.request_status = new_status
             Request.formation_date = datetime.now()
             Request.save()
@@ -106,7 +106,7 @@ class Requests_View(APIView):
 
         NeedRS = RequestsServices.objects.filter(request_id=RequestId)        
 
-        if checkStatus(Request.request_status, "удалён", User.admin_flag):
+        if checkStatus(Request.request_status, "удалён", False):
             for obj in NeedRS:
                 obj.delete()
                 
