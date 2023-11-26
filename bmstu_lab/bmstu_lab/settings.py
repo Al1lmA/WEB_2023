@@ -71,7 +71,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-AUTH_USER_MODEL = ''
+AUTH_USER_MODEL = 'bank_services.Users'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -197,3 +197,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 ADMINS = (
   ('admin', 'zhdanova.yana2003@yandex.ru'),
 )
+
+REDIS_HOST = '127.0.0.1'
+REDIS_PORT = 6379

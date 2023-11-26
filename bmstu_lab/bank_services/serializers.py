@@ -1,5 +1,9 @@
 from .models import *
 from rest_framework import serializers
+from rest_framework.serializers import ModelSerializer
+
+from collections import OrderedDict
+
 
 class BankServicesSerializer(serializers.ModelSerializer):
     class Meta:
@@ -23,11 +27,15 @@ class RequestsServicesSerializer(serializers.ModelSerializer):
         fields = ["bank_service_id", "request_id", "bill", "rs_id"]
 
 class UsersSerializer(serializers.ModelSerializer):
+    admin_flag = serializers.BooleanField(default=False, required=False)
+    is_staff = serializers.BooleanField(default=False, required=False)
+    is_superuser = serializers.BooleanField(default=False, required=False)
+
     class Meta:
         # Модель, которую мы сериализуем
         model = Users
         # Поля, которые мы сериализуем
-        fields = ["user_id", "name", "surname", "password", "phone_number", "admin_flag"]
+        fields = ["user_id", "name", "surname","login", "password", "phone_number", "admin_flag", "is_staff", "is_superuser"]
 
 class ManyToManySerializer(serializers.ModelSerializer):
     class Meta:

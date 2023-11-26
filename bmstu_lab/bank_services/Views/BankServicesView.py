@@ -9,6 +9,15 @@ from ..filters import *
 from ..minio.minioClass import *
 from datetime import datetime
 
+from rest_framework.decorators import permission_classes, authentication_classes, api_view
+from rest_framework.views import APIView
+from rest_framework.permissions import *
+from bmstu_lab.settings import REDIS_HOST, REDIS_PORT
+from bmstu_lab.permissions import *
+from drf_yasg.utils import swagger_auto_schema # type: ignore
+import redis # type: ignore
+session_storage = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT)
+
 def getServiceWithImage(serializer: BankServicesSerializer):
     minio = MinioClass()
     ServiceData = serializer.data
@@ -25,13 +34,22 @@ def putServiceImage(serializer: BankServicesSerializer, old_title):
     minio.addImage('bankservices', serializer.data['title'], serializer.data['img'])
 
 
-@api_view(['Get','Post'])
-def services_list_form(request, format=None):
-    if request.method == 'GET':
+class Services_View(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    # получение списка услуг
+    # можно всем
+    def get(self, request, format=None):
         """
         Возвращает список услуг
         """
-        userId = 2
+        try:
+            ssid = request.COOKIES["session_id"]
+        except:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        userId = Users.objects.get(login=session_storage.get(ssid).decode('utf-8')).user_id
+        
         Request = Requests.objects.filter(user_id = userId).filter(request_status = 'черновик') 
         if Request.exists():
             Request_id = Request[0].request_id
@@ -48,7 +66,12 @@ def services_list_form(request, format=None):
         CurrentList['services_list'] =  ServicesFilteredListData
         return Response(CurrentList)
     
-    elif request.method == 'POST':
+    
+    # добавление услуги
+    # можно только если авторизован и модератор
+    @method_permission_classes((IsModerator,))
+    @swagger_auto_schema(request_body=BankServicesSerializer)
+    def post(self, request, format=None):
         """
         Добавляет новую услугу
         """
@@ -69,9 +92,13 @@ def services_list_form(request, format=None):
 
 
 
-@api_view(['Get', 'Put', 'Delete', 'Post'])
-def services_detail(request, pk, format=None):
-    if request.method == 'GET':
+class Service_View(APIView):
+    # authentication_classes = [SessionAuthentication, BasicAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    # получение услуги
+    # можно всем
+    def get(self, request, pk, format=None):
         """
         Возвращает одну услугу
         """
@@ -80,7 +107,12 @@ def services_detail(request, pk, format=None):
         serializer = BankServicesSerializer(Service)
         return Response(getServiceWithImage(serializer), status=status.HTTP_202_ACCEPTED)
         
-    elif request.method == 'PUT':
+    
+    # изменение услуги
+    # можно только если авторизован и модератор
+    @method_permission_classes((IsModerator,))
+    @swagger_auto_schema(request_body=BankServicesSerializer)
+    def put(self, request, pk, format=None):
         """
         Обновляет информацию об услуге
         """
@@ -100,8 +132,11 @@ def services_detail(request, pk, format=None):
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    elif request.method == 'DELETE':
+    
+    # логическое удаление услуги
+    # можно только если авторизован и модератор
+    @method_permission_classes((IsModerator,))
+    def delete(self, request, pk, format=None):
         """
         Удаляет услугу
         """  
@@ -111,13 +146,21 @@ def services_detail(request, pk, format=None):
         Service.save()
         serializer = BankServicesSerializer(Service)
         return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
-    
-    elif request.method == 'POST':
+
+
+    # добавление продукта в заказ
+    # можно только если авторизован
+    def post(self, request, pk, format=None):
         """
         Добавляет услугу в заявку
         """ 
+        try:
+            ssid = request.COOKIES["session_id"]
+        except:
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
-        userId = 3
+        userId = Users.objects.get(login=session_storage.get(ssid).decode('utf-8')).user_id
+        
         Request = Requests.objects.filter(user_id = userId).filter(request_status = 'черновик') 
         
         if not Request.exists():

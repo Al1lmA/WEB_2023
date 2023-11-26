@@ -7,18 +7,39 @@ from ..models import *
 from rest_framework.decorators import api_view
 from ..filters import *
 
-@api_view(['Put','Delete'])
-def r_s_details(request, pk, format=None):
+from rest_framework.decorators import permission_classes, authentication_classes, api_view
+from rest_framework.views import APIView
+from rest_framework.permissions import *
+from bmstu_lab.settings import REDIS_HOST, REDIS_PORT
+from bmstu_lab.permissions import *
+from drf_yasg.utils import swagger_auto_schema # type: ignore
+import redis # type: ignore
+session_storage = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT)
 
-    userId = 2
-    Request = Requests.objects.filter(user=userId, request_status='черновик')
-    Request_id = Request[0].request_id
-    r_s = RequestsServices.objects.filter(bank_service_id=pk).filter(request_id=Request_id)
+class Requests_Services_View(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
-    if request.method == 'DELETE':
+    # удаление штрафа из нарушения
+    # можно только если авторизован
+    @swagger_auto_schema(request_body=ManyToManySerializer)
+    def delete(self, request, pk, format=None):
         """
         Удаление из заявки м-м
         """
+        try:
+            ssid = request.COOKIES["session_id"]
+        except:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        
+        userId = Users.objects.get(login=session_storage.get(ssid).decode('utf-8')).user_id
+        Request = Requests.objects.filter(user=userId, request_status='черновик')
+        if Request.exists():
+            Request_id = Request[0].request_id
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        r_s = RequestsServices.objects.filter(bank_service_id=pk).filter(request_id=Request_id)
+
         if len(r_s) > 0:
             r_s[0].delete()
 
@@ -27,11 +48,30 @@ def r_s_details(request, pk, format=None):
             return Response(status=status.HTTP_204_NO_CONTENT)
         
         return Response(status=status.HTTP_400_BAD_REQUEST)
-    
-    elif request.method == 'PUT':
+
+
+
+    # изменение описания штрафа
+    # можно только если авторизован
+    @swagger_auto_schema(request_body=ManyToManySerializer)
+    def put(self, request, pk, format=None):
         """
         Изменение значения м-м
         """
+        try:
+            ssid = request.COOKIES["session_id"]
+        except:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        
+        userId = Users.objects.get(login=session_storage.get(ssid).decode('utf-8')).user_id
+        Request = Requests.objects.filter(user=userId, request_status='черновик')
+        if Request.exists():
+            Request_id = Request[0].request_id
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        r_s = RequestsServices.objects.filter(bank_service_id=pk).filter(request_id=Request_id)
+
         if len(r_s) > 0:
             r_s[0].bill = request.data['bill']
             r_s[0].save()

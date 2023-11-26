@@ -41,7 +41,7 @@ schema_view = get_schema_view(
     permission_classes=(permissions.AllowAny,),
 )
 
-# router.register(r'users', UserViewSet, basename='user')
+router.register(r'users', UserViewSet, basename='user')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -49,14 +49,16 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 
-    path(r'services/', services_list_form, name='services_list_form'),
-    path(r'services/<int:pk>/', services_detail, name='services_detail'),
+    path('accounts/login/', login_view, name='login'),
+    path('accounts/logout/', logout_view, name='logout'),
 
-    path(r'requests/', request_list_form, name='request_list_form'),
-    path(r'requests/<int:pk>/', request_detail, name='request_detail'),
-    path(r'requests/<int:pk>/finally/', request_final, name='request_final'),
+    path(r'services/', Services_View.as_view(), name='services_list_form'),
+    path(r'services/<int:pk>/', Service_View.as_view(), name='services_detail'),
 
-    path(r'r_s/<int:pk>/', r_s_details, name='r_s_details'),
+    path(r'requests/', Requests_View.as_view(), name='request_list_form'),
+    path(r'requests/<int:pk>/', Request_View.as_view(), name='request_detail'),
+
+    path(r'r_s/<int:pk>/', Requests_Services_View.as_view(), name='r_s_details'),
 ]
 
 

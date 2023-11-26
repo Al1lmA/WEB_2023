@@ -9,6 +9,15 @@ from ..filters import *
 from datetime import datetime
 from ..minio.minioClass import *
 
+from rest_framework.decorators import permission_classes, authentication_classes, api_view
+from rest_framework.views import APIView
+from rest_framework.permissions import *
+from bmstu_lab.settings import REDIS_HOST, REDIS_PORT
+from bmstu_lab.permissions import *
+from drf_yasg.utils import swagger_auto_schema # type: ignore
+import redis # type: ignore
+session_storage = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT)
+
 def checkStatus(old_status, new_status, admin):
     return ((not admin) and (new_status in ['сформирован', 'удалён']) and (old_status == 'черновик')) or (admin and (new_status in ['завершён', 'отклонён']) and (old_status == 'сформирован')) 
 
@@ -28,9 +37,12 @@ def getServicesForOneRequest(serializer: ManyToManySerializer):
     return ServiceList
 
 
-@api_view(['Get', 'Put', 'Delete'])
-def request_list_form(request, format=None):
-    if request.method == 'GET':
+class Requests_View(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    # получение списка заказов
+    # можно только если авторизован
+    def get(self, request, format=None):
         """
         Возвращает список заявок
         """
@@ -46,13 +58,20 @@ def request_list_form(request, format=None):
             
         return Response(RequestData, status=status.HTTP_202_ACCEPTED)
     
-
-    elif request.method == 'PUT':
+    # отправка заказа пользователем
+    # можно только если авторизован
+    @swagger_auto_schema(request_body=RequestsSerializer)
+    def put(self, request, format=None):
         """
         Формирует заявку
         """
+        try:
+            ssid = request.COOKIES["session_id"]
+        except:
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
-        userId = 3
+        userId = Users.objects.get(login=session_storage.get(ssid).decode('utf-8')).user_id
+
         User = get_object_or_404(Users, user_id=userId)
         Request = get_object_or_404(Requests, user=userId, request_status='черновик')
         new_status = "сформирован"
@@ -66,12 +85,19 @@ def request_list_form(request, format=None):
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)         
         return Response(status=status.HTTP_400_BAD_REQUEST)
     
-    elif request.method == 'DELETE':
+    # удаление заказа пользователем
+    # можно только если авторизован
+    def delete(self, request, format=None):
         """
         Удаляет заявку
         """
+        try:
+            ssid = request.COOKIES["session_id"]
+        except:
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
-        userId = 2
+        userId = Users.objects.get(login=session_storage.get(ssid).decode('utf-8')).user_id
+
         User = Users.objects.get(user_id=userId)
         Request = Requests.objects.filter(user=userId).filter(request_status='черновик')
 
@@ -88,64 +114,66 @@ def request_list_form(request, format=None):
             return Response(status=status.HTTP_204_NO_CONTENT)        
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
+        
 
-@api_view(['Get', 'Put'])
-def request_detail(request, pk, format=None):
-    if request.method == 'GET':
+
+
+class Request_View(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    # получение нарушения
+    # можно получить нарушение  если авторизован
+    # если авторизован и модератор, то можно получить любой заказ
+    def get(self, request, pk, format=None):
         """
         Возвращает одну заявку
         """
+        try:
+            ssid = request.COOKIES["session_id"]
+        except:
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
-        Request = get_object_or_404(Requests, request_id=pk)
-        serializer = RequestsSerializer(Request)
+        User = Users.objects.get(login=session_storage.get(ssid).decode('utf-8'))
+        requests = Users.objects.filter(user=User.user_id).values_list('request_id', flat=True)
 
-        positions = RequestsServices.objects.filter(request_id=pk)
-        positionsSerializer = ManyToManySerializer(positions, many=True)
+        if(pk in requests) or User.admin_flag: 
 
-        response = serializer.data
-        response['user_login'] = Users.objects.get(user_id=response['user']).login
-        response["request's services"] = getServicesForOneRequest(positionsSerializer)
-        return Response(response, status=status.HTTP_202_ACCEPTED)
-    
-    elif request.method == 'PUT':
-        """
-        Изменяет заявку
-        """
+            Request = get_object_or_404(Requests, request_id=pk)
+            serializer = RequestsSerializer(Request)
 
-        Request = get_object_or_404(Requests, request_id=pk)
-        serializer = RequestsSerializer(Request, data=request.data)
+            positions = RequestsServices.objects.filter(request_id=pk)
+            positionsSerializer = ManyToManySerializer(positions, many=True)
 
-        if 'status' in request.data.keys():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            response = serializer.data
+            response['user_login'] = Users.objects.get(user_id=response['user']).login
+            response["request's services"] = getServicesForOneRequest(positionsSerializer)
+            return Response(response, status=status.HTTP_202_ACCEPTED)
+        return Response(status=status.HTTP_403_FORBIDDEN)
         
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
-        
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
     
-@api_view(['Put'])
-def request_final(request, pk, format=None):
+    # перевод заказа модератором на статус A или W
+    # можно только если авторизован и модератор
+    @method_permission_classes((IsModerator,))
+    @swagger_auto_schema(request_body=RequestsSerializer)
+    def put(self, request, pk, format=None):
         """
         Принимает или отклоняет заявку
         """
-
-        userId = 1
-        User = get_object_or_404(Users, user_id=userId)
         Request = get_object_or_404(Requests, request_id=pk)
-
-
+        
         try: 
             new_status = request.data['request_status']
             print(new_status)
         except:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         
-        if checkStatus(Request.request_status, new_status, User.admin_flag):
+        if checkStatus(Request.request_status, new_status, True):
             Request.request_status = new_status
             Request.completion_date = datetime.now()
             Request.save()
             serializer = RequestsSerializer(Request)
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)        
         return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    
+
