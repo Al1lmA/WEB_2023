@@ -93,7 +93,7 @@ def logout_view(request):
     session_storage.delete(ssid)
 
     logout(request._request)
-    response = HttpResponse("{'status': 'success'}")
+    response = HttpResponse("{'status': 'ok'}")
     response.delete_cookie("session_id")
     return response
 
