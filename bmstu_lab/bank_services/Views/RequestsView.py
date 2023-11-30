@@ -46,8 +46,19 @@ class Requests_View(APIView):
         """
         Возвращает список заявок
         """
+
+        try:
+            ssid = request.COOKIES["session_id"]
+        except:
+            return Response(status=status.HTTP_403_FORBIDDEN)
         
-        RequestsFilteredList = RequestsFilter(Requests.objects.all(), request)
+        user = Users.objects.get(login=session_storage.get(ssid).decode('utf-8'))
+
+        if user.admin_flag:        
+            RequestsFilteredList = RequestsFilter(Requests.objects.all(), request)
+        else:
+            RequestsFilteredList = RequestsFilter(Requests.objects.filter(user=user.user_id), request)
+        
         serializer = RequestsSerializer(RequestsFilteredList, many=True)
 
         RequestData = serializer.data

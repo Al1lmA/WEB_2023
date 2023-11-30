@@ -45,10 +45,9 @@ class Services_View(APIView):
         """
         try:
             ssid = request.COOKIES["session_id"]
+            userId = Users.objects.get(login=session_storage.get(ssid).decode('utf-8')).user_id
         except:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-
-        userId = Users.objects.get(login=session_storage.get(ssid).decode('utf-8')).user_id
+            userId = -1
         
         Request = Requests.objects.filter(user_id = userId).filter(request_status = 'черновик') 
         if Request.exists():
