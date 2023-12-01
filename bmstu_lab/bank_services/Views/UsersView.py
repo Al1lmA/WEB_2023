@@ -58,9 +58,23 @@ class UserViewSet(ModelViewSet):
             return Response({'status': 'Success'}, status=200)
         return Response({'status': 'Error', 'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['Post'])
+@permission_classes([AllowAny])
+def check(request):
+    session_id = request.headers.get("authorization")
+    print(session_id)
 
-@authentication_classes([])
-@csrf_exempt
+    print(session_storage.get(session_id))
+
+    if (session_storage.get(session_id)):
+        user = Users.objects.get(login=session_storage.get(session_id).decode('utf-8'))
+        
+        serializer = UsersSerializer(user, many=False)
+        print(serializer.data)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(status=status.HTTP_403_FORBIDDEN)
+
 @swagger_auto_schema(method='post', request_body=UsersSerializer)
 @api_view(['Post'])
 @permission_classes([AllowAny])
@@ -86,14 +100,15 @@ def login_view(request):
     else:
         return HttpResponse("{'status': 'error', 'error': 'login failed'}")
 
-@authentication_classes([])
+
 @csrf_exempt
 @swagger_auto_schema(method='post')
 @api_view(['Post'])
 @permission_classes([AllowAny])
 def logout_view(request):
     try:
-        ssid = request.COOKIES["session_id"]
+        ssid = request.headers.get("authorization")
+        print(ssid)
     except:
         return HttpResponse("{'status': 'error', 'error': 'logout failed'}")
         
@@ -104,19 +119,4 @@ def logout_view(request):
     response.delete_cookie("session_id")
     return response
 
-@api_view(['Post'])
-@permission_classes([AllowAny])
-def check(request):
-    session_id = request.headers.get("authorization")
-    print(session_id)
 
-    print(session_storage.get(session_id))
-
-    if (session_storage.get(session_id)):
-        user = Users.objects.get(login=session_storage.get(session_id).decode('utf-8'))
-        
-        serializer = UsersSerializer(user, many=False)
-        print(serializer.data)
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    return Response(status=status.HTTP_403_FORBIDDEN)

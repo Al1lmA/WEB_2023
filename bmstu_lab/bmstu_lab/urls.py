@@ -51,6 +51,7 @@ urlpatterns = [
 
     path('accounts/login/', login_view, name='login'),
     path('accounts/logout/', logout_view, name='logout'),
+    path ('accounts/check/', check, name='check'),
 
     path(r'services/', Services_View.as_view(), name='services_list_form'),
     path(r'services/<int:pk>/', Service_View.as_view(), name='services_detail'),
