@@ -7,72 +7,104 @@
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, UserManager
+from django.contrib.auth.base_user import BaseUserManager
+from django.db import models
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from datetime import datetime
+from django.utils import timezone
 
-class NewUserManager(UserManager):
-    def create_user(self, login, password=None, **extra_fields):
-        if not login:
-            raise ValueError('У пользователя должен быть логин!')
-        
-        user: Users = self.model(login=login, **extra_fields) 
+
+class CustomUserManager(BaseUserManager):
+    def create_user(self, username, email, password="1234", **extra_fields):
+        extra_fields.setdefault('username', username)
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
         user.set_password(password)
-        user.save(using=self.db)
+        user.save()
         return user
 
-class BankServices(models.Model):
-    bank_service_id = models.AutoField(primary_key=True)
-    title = models.CharField(blank=True, null=True)
-    button_text = models.CharField(blank=True, null=True)
-    short_description = models.CharField(blank=True, null=True)
-    description = models.TextField(blank=True, null=True)
-    img = models.CharField(blank=True, null=True)
-    order_img = models.CharField(blank=True, null=True)
-    service_status = models.CharField(max_length=20, default='действует')  
+    def create_superuser(self, username, email, password="1234", **extra_fields):
+        extra_fields.setdefault('is_moderator', True)
+        extra_fields.setdefault('is_active', True)
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault('is_superuser', True)
+        return self.create_user(username, email, password, **extra_fields)
+
+
+class CustomUser(AbstractBaseUser, PermissionsMixin):
+    email = models.EmailField(unique=True)
+    username = models.CharField(unique=True)
+    is_moderator = models.BooleanField(default=False)
+
+    is_staff = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+
+    objects = CustomUserManager()
+
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = []
+
+    def __str__(self):
+        return self.username
+
+    class Meta:
+        verbose_name = "Пользователь"
+        verbose_name_plural = "Пользователи"
 
 
 class Requests(models.Model):
-    request_id = models.AutoField(primary_key=True)
-    request_status = models.CharField(max_length=20, default='черновик')
-    creation_date = models.DateTimeField(blank=True, null=True)
-    formation_date = models.DateTimeField(blank=True, null=True)
-    completion_date = models.DateTimeField(blank=True, null=True)
-    user = models.ForeignKey('Users', models.DO_NOTHING, blank=True, null=True)
-    admin = models.ForeignKey('Users', models.DO_NOTHING, related_name='requests_admin_set', blank=True, null=True)
+    STATUS_CHOICES = (
+        (1, 'Введён'),
+        (2, 'В работе'),
+        (3, 'Завершён'),
+        (4, 'Отменён'),
+        (5, 'Удалён'),
+    )
+
+    user = models.ForeignKey(CustomUser, models.CASCADE, blank=True, null=True)
+    created_date = models.DateTimeField(default=datetime.now(tz=timezone.utc), blank=True, null=True)
+    formated_date = models.DateTimeField(blank=True, null=True)
+    closed_date = models.DateTimeField(blank=True, null=True)
+    status = models.IntegerField(choices=STATUS_CHOICES, default=1, verbose_name="Статус")
+
+    def __str__(self):
+        return "Заявка №" + str(self.pk)
+
+    class Meta:
+        verbose_name = "Заявка"
+        verbose_name_plural = "Заявки"
+
+
+class BankServices(models.Model):
+    STATUS_CHOICES = (
+        (1, 'Действует'),
+        (2, 'Удалена'),
+    )
+
+    image = models.ImageField(default="images/default.jpg", blank=True, null=True)
+    title = models.CharField(blank=True, null=True, max_length=70)
+    price = models.CharField(blank=True, null=True)
+    text = models.CharField(blank=True, null=True)
+    status = models.IntegerField(choices=STATUS_CHOICES, default=1, verbose_name="Статус")
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = "Услуга"
+        verbose_name_plural = "Услуги"
 
 
 class RequestsServices(models.Model):
-    bank_service_id = models.ForeignKey('BankServices', models.DO_NOTHING) 
-    request_id = models.ForeignKey('Requests', models.DO_NOTHING)
-    bill = models.CharField(blank=True, null=True, max_length=100)
-    rs_id = models.AutoField(primary_key=True)
-
+    BankService = models.ForeignKey(BankServices, models.CASCADE, null=True)
+    Request = models.ForeignKey(Requests, models.CASCADE, null=True)
+    BankService_desc = models.CharField(blank=True, null=True, max_length=400)
 
     class Meta:
-        unique_together = (('bank_service_id', 'request_id'),)
+        unique_together = (('BankService', 'Request'),)
+        verbose_name = "Услуга-заявка"
+        verbose_name_plural = "Услуги-Заявки"
 
 
-class Users(AbstractBaseUser):
-    objects = NewUserManager()
-
-    user_id = models.AutoField(primary_key=True)
-    name = models.CharField(blank=True, null=True)
-    surname = models.CharField(blank=True, null=True)
-    login = models.CharField(max_length=255, unique=True, verbose_name="Логин")
-    password = models.CharField(max_length=255, verbose_name="Пароль")
-    phone_number = models.CharField(blank=True, null=True)
-    admin_flag = models.BooleanField(blank=True, null=True)
-    is_staff = models.BooleanField(default=False, verbose_name="Является ли пользователь менеджером?")
-    is_superuser = models.BooleanField(default=False, verbose_name="Является ли пользователь админом?")
-
-    USERNAME_FIELD = 'login'
-
-# class Users(AbstractBaseUser):
-#     objects = NewUserManager()
-
-#     user_id = models.AutoField(primary_key=True)
-#     Userlogin = models.CharField(max_length=255, unique=True, verbose_name="Логин")
-#     password = models.CharField(max_length=255, verbose_name="Пароль")
-#     admin_pass = models.BooleanField(blank=True, null=True, default=False)
-#     is_staff = models.BooleanField(default=False, verbose_name="Является ли пользователь менеджером?")
-#     is_superuser = models.BooleanField(default=False, verbose_name="Является ли пользователь админом?")
     
-#     USERNAME_FIELD = 'Userlogin'
+

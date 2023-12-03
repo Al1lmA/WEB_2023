@@ -1,8 +1,11 @@
 from .models import *
 from rest_framework import serializers
-from rest_framework.serializers import ModelSerializer
 
-from collections import OrderedDict
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ('id', 'username', 'email', 'is_moderator')
 
 
 class BankServicesSerializer(serializers.ModelSerializer):
@@ -10,41 +13,35 @@ class BankServicesSerializer(serializers.ModelSerializer):
         # Модель, которую мы сериализуем
         model = BankServices
         # Поля, которые мы сериализуем
-        fields = ["bank_service_id", "title", "button_text", "short_description", "description", "img", "order_img", "service_status"]
+        fields = '__all__'
+
 
 class RequestsSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True, many=False)
+    BankServices = serializers.SerializerMethodField()
+
+    def get_BankServices(self, MyRequest):
+        RSs = RequestsServices.objects.filter(Request=MyRequest)
+        return BankServicesSerializer([rs.BankService for rs in RSs], many=True).data
+
     class Meta:
         # Модель, которую мы сериализуем
         model = Requests
         # Поля, которые мы сериализуем
-        fields = ["request_id", "request_status", "creation_date", "formation_date", "completion_date", "user", "admin"]
+        fields = '__all__'
 
-class RequestsServicesSerializer(serializers.ModelSerializer):
+
+class ConfOfFinesSerializer(serializers.ModelSerializer):
+    BankServices = BankServicesSerializer(read_only=True, many=False)
+    Request = RequestsSerializer(read_only=True, many=False)
+
     class Meta:
         # Модель, которую мы сериализуем
         model = RequestsServices
         # Поля, которые мы сериализуем
-        fields = ["bank_service_id", "request_id", "bill", "rs_id"]
+        fields = '__all__'
 
-class UsersSerializer(serializers.ModelSerializer):
-    admin_flag = serializers.BooleanField(default=False, required=False)
-    is_staff = serializers.BooleanField(default=False, required=False)
-    is_superuser = serializers.BooleanField(default=False, required=False)
 
-    class Meta:
-        # Модель, которую мы сериализуем
-        model = Users
-        # Поля, которые мы сериализуем
-        fields = ["user_id", "name", "surname","login", "password", "phone_number", "admin_flag", "is_staff", "is_superuser"]
-
-class ManyToManySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = RequestsServices
-        fields = ["bill", "bank_service_id"]
-
-class ServiceForRequest(serializers.ModelSerializer):
-    class Meta:
-        # Модель, которую мы сериализуем
-        model = BankServices
-        # Поля, которые мы сериализуем
-        fields = ["title", "button_text", "short_description", "description"]
+class UserLoginSerializer(serializers.Serializer):
+    username = serializers.CharField(required=True)
+    password = serializers.CharField(required=True)

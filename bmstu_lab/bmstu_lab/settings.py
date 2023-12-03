@@ -71,7 +71,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-AUTH_USER_MODEL = 'bank_services.Users'
+AUTH_USER_MODEL = 'bank_services.CustomUser'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -144,7 +144,7 @@ WSGI_APPLICATION = 'bmstu_lab.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'bank_services',
+        'NAME': 'bank_servicesN',
         'USER': 'admin',
         'PASSWORD': '123',
         'HOST': 'localhost',
@@ -200,3 +200,9 @@ ADMINS = (
 
 REDIS_HOST = '127.0.0.1'
 REDIS_PORT = 6379
+
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+AWS_STORAGE_BUCKET_NAME = 'bankservices'
+AWS_ACCESS_KEY_ID = 'AaoDCT0HL7KEUYVEA5wh'
+AWS_SECRET_ACCESS_KEY = 'eSWrPjBNLFfJ1kFmdnxekKqcHAgdZnJWvsW0mb9H'
+AWS_S3_ENDPOINT_URL = 'http://127.0.0.1:9000'

@@ -41,7 +41,7 @@ schema_view = get_schema_view(
     permission_classes=(permissions.AllowAny,),
 )
 
-router.register(r'users', UserViewSet, basename='user')
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -51,15 +51,17 @@ urlpatterns = [
 
     path('accounts/login/', login_view, name='login'),
     path('accounts/logout/', logout_view, name='logout'),
-    path ('accounts/check/', check, name='check'),
+    path('accounts/check/', check, name='check'),
 
-    path(r'services/', Services_View.as_view(), name='services_list_form'),
-    path(r'services/<int:pk>/', Service_View.as_view(), name='services_detail'),
+    path(r'services/search/', search_services),
+    path(r'services/<int:service_id>/', get_service),
+    path(r'services/<int:service_id>/add_to_request/', add_service_to_request),
 
-    path(r'requests/', Requests_View.as_view(), name='request_list_form'),
-    path(r'requests/<int:pk>/', Request_View.as_view(), name='request_detail'),
-
-    path(r'r_s/<int:pk>/', Requests_Services_View.as_view(), name='r_s_details'),
+    path(r'requests/', search_requests),
+    path(r'requests/draft/', get_draft_request),
+    path(r'requests/<int:request_id>/delete/', delete_request),
+    path(r'requests/<int:request_id>/delete_service/<int:service_id>/', delete_servce_from_request),
+    path(r'requests/<int:request_id>/update_status_user/', update_request_status_user),
 ]
 
 
