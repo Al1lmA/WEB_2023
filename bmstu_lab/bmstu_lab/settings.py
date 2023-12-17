@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-81o@&-e99=uba%s1a9fl^6=(+x-=6wskrpt@4po4iu*bz_7c_5
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -206,3 +206,4 @@ AWS_STORAGE_BUCKET_NAME = 'bankservices'
 AWS_ACCESS_KEY_ID = 'AaoDCT0HL7KEUYVEA5wh'
 AWS_SECRET_ACCESS_KEY = 'eSWrPjBNLFfJ1kFmdnxekKqcHAgdZnJWvsW0mb9H'
 AWS_S3_ENDPOINT_URL = 'http://127.0.0.1:9000'
+AWS_S3_ENDPOINT_URL = 'http://192.168.200.156:9000'
