@@ -18,7 +18,7 @@ session_storage = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT)
 @api_view(["GET"])
 def search_services(request):
     query = request.GET.get("title", "")
-    bankServices = BankServices.objects.filter(title__icontains=query)
+    bankServices = BankServices.objects.filter(title__icontains=query, status=1)
     draft_Request = find_draft_request(request)
 
     
