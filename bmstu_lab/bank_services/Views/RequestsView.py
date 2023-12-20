@@ -3,11 +3,11 @@ from rest_framework import status
 from ..serializers import *
 from ..models import *
 
-
 from bmstu_lab.permissions import *
 from rest_framework.decorators import permission_classes, api_view
-from bmstu_lab.settings import REDIS_HOST, REDIS_PORT
+from bmstu_lab.settings import REDIS_HOST, REDIS_PORT, PASSWORD_ACYNC
 import redis
+import requests
 
 from ..utils import get_session
 
@@ -73,16 +73,38 @@ def delete_request(request, request_id):
 
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated])
-def update_request_status_user(reques, request_id):
-    if not Requests.objects.filter(pk=request_id).exists():
-        return Response(status=status.HTTP_404_NOT_FOUND)
+def update_request_status_user(request):
 
-    Request = Requests.objects.get(pk=request_id)
+    Request = find_draft_request(request)
     Request.status = 2
+
+    url = "http://127.0.0.1:5000/rating/"
+    params = { "request_id" : Request.pk }
+    response = requests.post(url, json=params)
+    print(response.status_code)
+
     Request.formated_date = datetime.now(tz=timezone.utc)
     Request.save()
 
     return Response(status=status.HTTP_200_OK)
+
+@api_view(["PUT"])
+def rating(request, request_id):
+    rating = request.data["rating"]
+    password = request.data["password"]
+    print(rating, password)
+    if password != PASSWORD_ACYNC:
+        return Response(status=status.HTTP_403_FORBIDDEN)
+    try:
+        Request = Requests.objects.get(pk=request_id)
+        Request.rating = rating
+        print(Request.rating)
+        Request.save()
+        return Response(status=status.HTTP_200_OK)
+    
+    except Requests.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
 
 
 def find_draft_request(request):

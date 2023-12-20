@@ -66,6 +66,7 @@ class Requests(models.Model):
     formated_date = models.DateTimeField(blank=True, null=True)
     closed_date = models.DateTimeField(blank=True, null=True)
     status = models.IntegerField(choices=STATUS_CHOICES, default=1, verbose_name="Статус")
+    rating = models.CharField(blank=True, null=True)
 
     def __str__(self):
         return "Заявка №" + str(self.pk)

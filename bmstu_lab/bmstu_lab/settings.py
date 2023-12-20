@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-81o@&-e99=uba%s1a9fl^6=(+x-=6wskrpt@4po4iu*bz_7c_5
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -46,15 +46,15 @@ INSTALLED_APPS = [
     'drf_yasg',
 ]
 
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
-    ],
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
-    ],
-}
+# REST_FRAMEWORK = {
+#     'DEFAULT_AUTHENTICATION_CLASSES': [
+#         'rest_framework.authentication.BasicAuthentication',
+#         'rest_framework.authentication.SessionAuthentication',
+#     ],
+#     'DEFAULT_PERMISSION_CLASSES': [
+#         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+#     ],
+# }
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -87,36 +87,36 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'bmstu_lab.urls'
 
-# CORS_ALLOWED_ORIGINS = [
-#     # Frontend
-#     "http://localhost:3000",
-#     "http://127.0.0.1:3000",
-#     # Backend
-#     "http://localhost:8000",
-#     "http://127.0.0.1:8000",
-# ]
+CORS_ALLOWED_ORIGINS = [
+    # Frontend
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    # Backend
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
 
-# CORS_ALLOW_METHODS = ['DELETE', 'GET', 'OPTIONS', 'PATCH', 'POST', 'PUT']
+CORS_ALLOW_METHODS = ['DELETE', 'GET', 'OPTIONS', 'PATCH', 'POST', 'PUT']
 
-# CORS_ALLOWED_URLS = [
-#     r"^/services/$",
-#     r"^/services/\d+/$",
+CORS_ALLOWED_URLS = [
+    r"^/services/$",
+    r"^/services/\d+/$",
 
-# ]
+]
 
-# CORS_ALLOW_HEADERS = [
-#     "accept",
-#     "accept-encoding",
-#     "authorization",
-#     "content-type",
-#     "dnt",
-#     "origin",
-#     "user-agent",
-#     "x-csrftoken",
-#     "x-requested-with",
-# ]
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
 
-# CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_CREDENTIALS = True
 
 
 TEMPLATES = [
@@ -207,3 +207,4 @@ AWS_ACCESS_KEY_ID = 'AaoDCT0HL7KEUYVEA5wh'
 AWS_SECRET_ACCESS_KEY = 'eSWrPjBNLFfJ1kFmdnxekKqcHAgdZnJWvsW0mb9H'
 AWS_S3_ENDPOINT_URL = 'http://127.0.0.1:9000'
 AWS_S3_ENDPOINT_URL = 'http://192.168.200.156:9000'
+PASSWORD_ACYNC = "12345"
