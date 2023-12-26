@@ -21,7 +21,10 @@ def search_requests(request):
 
     user = CustomUser.objects.get(username=session_storage.get(session_id).decode('utf-8'))
 
-    requests = Requests.objects.filter(user_id=user.pk)
+    if user.is_moderator == True:
+        requests = Requests.objects.all()
+    else:
+        requests = Requests.objects.filter(user_id=user.pk)
 
     serializer = RequestsSerializer(requests, many=True)
 
