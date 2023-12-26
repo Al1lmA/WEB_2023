@@ -81,7 +81,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # 'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
 ]
 
@@ -203,8 +203,8 @@ REDIS_PORT = 6379
 
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 AWS_STORAGE_BUCKET_NAME = 'bankservices'
-AWS_ACCESS_KEY_ID = 'AaoDCT0HL7KEUYVEA5wh'
-AWS_SECRET_ACCESS_KEY = 'eSWrPjBNLFfJ1kFmdnxekKqcHAgdZnJWvsW0mb9H'
+AWS_ACCESS_KEY_ID = 'BsJJ7KCLmD0fNTuzHT7n'
+AWS_SECRET_ACCESS_KEY = 'YPp3kAalCpIMAYh5uLrkCTZTSOfHVtiXsLgum2ey'
 AWS_S3_ENDPOINT_URL = 'http://127.0.0.1:9000'
-AWS_S3_ENDPOINT_URL = 'http://192.168.200.156:9000'
+# AWS_S3_ENDPOINT_URL = 'http://192.168.200.156:9000'
 PASSWORD_ACYNC = "12345"

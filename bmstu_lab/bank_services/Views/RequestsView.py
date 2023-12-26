@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework import status
 from ..serializers import *
@@ -18,16 +19,40 @@ session_storage = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT)
 @permission_classes([IsAuthenticated])
 def search_requests(request):
     session_id = get_session(request)
-
-    user = CustomUser.objects.get(username=session_storage.get(session_id).decode('utf-8'))
+    user = get_object_or_404(CustomUser, username=session_storage.get(session_id).decode('utf-8'))
 
     if user.is_moderator == True:
         requests = Requests.objects.all()
-    else:
+    else: 
         requests = Requests.objects.filter(user_id=user.pk)
 
-    serializer = RequestsSerializer(requests, many=True)
+    # Get parameters for date range and status from the request
+    start_date = request.query_params.get('start_date', None)
+    end_date = request.query_params.get('end_date', None)
+    status = request.query_params.get('status', None)
 
+     # Parse start_date and end_date and filter the query if they are provided
+    if start_date:
+        requests = requests.filter(formated_date__gte=start_date)
+
+    if end_date:
+            requests = requests.filter(formated_date__lte=end_date)
+
+    # If status parameter is provided, filter by the status
+    if status:
+        try:
+            status_num = int(status)
+            if status_num in dict(Requests.STATUS_CHOICES).keys():
+                requests = requests.filter(status=status_num)
+        except ValueError:
+            pass  # or you could return an error message that status must be an integer
+
+
+    print(start_date)
+
+    # Serialize and return response
+    serializer = RequestsSerializer(requests, many=True)
+    # print(serializer.data)
     return Response(serializer.data)
 
 

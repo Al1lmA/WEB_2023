@@ -84,7 +84,7 @@ class BankServices(models.Model):
 
     image = models.ImageField(default="images/default.jpg", blank=True, null=True)
     title = models.CharField(blank=True, null=True, max_length=70)
-    price = models.CharField(blank=True, null=True)
+
     text = models.CharField(blank=True, null=True)
     status = models.IntegerField(choices=STATUS_CHOICES, default=1, verbose_name="Статус")
 
