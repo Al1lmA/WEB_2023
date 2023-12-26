@@ -25,9 +25,7 @@ def check(request):
 
     if session_storage.get(session_id):
         user = CustomUser.objects.get(username=session_storage.get(session_id).decode('utf-8'))
-
         serializer = UserSerializer(user, many=False)
-
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     return Response(status=status.HTTP_403_FORBIDDEN)

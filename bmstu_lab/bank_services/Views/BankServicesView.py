@@ -16,6 +16,22 @@ session_storage = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT)
 
 
 @api_view(["GET"])
+def services(request):
+    query = request.GET.get("title", "")
+    bankServices = BankServices.objects.filter(title__icontains=query)
+    draft_Request = find_draft_request(request)
+
+    
+
+    data = {
+        "request": RequestsSerializer(draft_Request, many=False).data,
+        "services": BankServicesSerializer(bankServices, many=True).data
+    }
+
+    return Response(data)
+
+
+@api_view(["GET"])
 def search_services(request):
     query = request.GET.get("title", "")
     bankServices = BankServices.objects.filter(title__icontains=query, status=1)
@@ -37,6 +53,52 @@ def get_service(request, service_id):
     serializer = BankServicesSerializer(BankService, many=False)
 
     return Response(serializer.data)
+
+
+
+@api_view(["PUT"])
+@permission_classes([IsAuthenticated])
+def edit_service(request, fine_id):
+
+    session_id = get_session(request)
+    if session_id is None:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+    
+    user = CustomUser.objects.get(username=session_storage.get(session_id).decode('utf-8'))
+    if not user.is_moderator:
+        return Response(status=status.HTTP_403_FORBIDDEN)
+    
+    service = BankServices.objects.get(pk=fine_id)
+
+    fields = request.data.keys()
+    if 'pk' in fields:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    serializer = BankServicesSerializer(service, data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["POST"])
+def add_service(request):
+    print(request.data)
+    session_id = get_session(request)
+    if session_id is None:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+    
+    user = CustomUser.objects.get(username=session_storage.get(session_id).decode('utf-8'))    
+    if not user.is_moderator:
+        return Response(status=status.HTTP_403_FORBIDDEN)
+    
+    fields = request.data.keys()
+    if 'pk' in fields:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    serializer = BankServicesSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["POST"])

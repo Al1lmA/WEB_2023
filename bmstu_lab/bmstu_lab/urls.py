@@ -53,15 +53,19 @@ urlpatterns = [
     path('accounts/logout/', logout_view, name='logout'),
     path('accounts/check/', check, name='check'),
 
+    path(r'services/', services),
     path(r'services/search/', search_services),
     path(r'services/<int:service_id>/', get_service),
     path(r'services/<int:service_id>/add_to_request/', add_service_to_request),
+    path(r'services/<int:fine_id>/edit/', edit_service),
+    path(r'services/add/', add_service),
 
     path(r'requests/', search_requests),
     path(r'requests/draft/', get_draft_request),
     path(r'requests/<int:request_id>/delete/', delete_request),
     path(r'requests/<int:request_id>/delete_service/<int:service_id>/', delete_servce_from_request),
     path(r'requests/update_status_user/', update_request_status_user),
+    path(r'requests/<int:request_id>/update_status_admin/', update_request_status_admin),
 
     path(r'requests/<int:request_id>/rating/', rating),
 ]

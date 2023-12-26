@@ -116,6 +116,27 @@ def update_request_status_user(request):
 
     return Response(status=status.HTTP_200_OK)
 
+
+@api_view(["PUT"])
+@permission_classes([IsAuthenticated])
+def update_request_status_admin(request, request_id):
+    session_id = get_session(request)
+    user = get_object_or_404(CustomUser, username=session_storage.get(session_id).decode('utf-8'))
+    print(user)
+    print(request.data)
+
+    if not user.is_moderator == True:
+        return Response(status=status.HTTP_403_FORBIDDEN)
+    
+    Request = Requests.objects.get(pk=request_id)
+    Request.status = request.data['status']
+    Request.closed_date = datetime.now()
+    Request.save()
+    serializer = RequestsSerializer(Request)
+    return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+
+
+
 @api_view(["PUT"])
 def rating(request, request_id):
     rating = request.data["rating"]

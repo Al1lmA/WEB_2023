@@ -82,7 +82,7 @@ class BankServices(models.Model):
         (2, 'Удалена'),
     )
 
-    image = models.ImageField(default="images/default.jpg", blank=True, null=True)
+    image = models.ImageField(blank=True, null=True)
     title = models.CharField(blank=True, null=True, max_length=70)
 
     text = models.CharField(blank=True, null=True)
