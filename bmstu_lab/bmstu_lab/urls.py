@@ -57,7 +57,7 @@ urlpatterns = [
     path(r'services/search/', search_services),
     path(r'services/<int:service_id>/', get_service),
     path(r'services/<int:service_id>/add_to_request/', add_service_to_request),
-    path(r'services/<int:fine_id>/edit/', edit_service),
+    path(r'services/<int:service_id>/edit/', edit_service),
     path(r'services/add/', add_service),
 
     path(r'requests/', search_requests),

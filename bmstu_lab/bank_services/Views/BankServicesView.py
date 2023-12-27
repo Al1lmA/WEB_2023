@@ -58,7 +58,7 @@ def get_service(request, service_id):
 
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated])
-def edit_service(request, fine_id):
+def edit_service(request, service_id):
 
     session_id = get_session(request)
     if session_id is None:
@@ -68,7 +68,7 @@ def edit_service(request, fine_id):
     if not user.is_moderator:
         return Response(status=status.HTTP_403_FORBIDDEN)
     
-    service = BankServices.objects.get(pk=fine_id)
+    service = BankServices.objects.get(pk=service_id)
 
     fields = request.data.keys()
     if 'pk' in fields:
