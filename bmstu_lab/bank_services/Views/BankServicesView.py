@@ -21,10 +21,9 @@ def services(request):
     bankServices = BankServices.objects.filter(title__icontains=query)
     draft_Request = find_draft_request(request)
 
-    
 
     data = {
-        "request": RequestsSerializer(draft_Request, many=False).data,
+        "request_id": draft_Request.id if draft_Request else None,
         "services": BankServicesSerializer(bankServices, many=True).data
     }
 
@@ -37,10 +36,9 @@ def search_services(request):
     bankServices = BankServices.objects.filter(title__icontains=query, status=1)
     draft_Request = find_draft_request(request)
 
-    
 
     data = {
-        "request": RequestsSerializer(draft_Request, many=False).data,
+        "request_id": draft_Request.id if draft_Request else None,
         "services": BankServicesSerializer(bankServices, many=True).data
     }
 

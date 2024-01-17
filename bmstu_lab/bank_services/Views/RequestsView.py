@@ -11,6 +11,7 @@ import redis
 import requests
 
 from ..utils import get_session
+from django.db.models import Q
 
 session_storage = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT)
 
@@ -21,10 +22,11 @@ def search_requests(request):
     session_id = get_session(request)
     user = get_object_or_404(CustomUser, username=session_storage.get(session_id).decode('utf-8'))
 
+    statuses = [2, 3, 4]
     if user.is_moderator == True:
-        requests = Requests.objects.all()
+        requests = Requests.objects.filter(status__in=statuses)
     else: 
-        requests = Requests.objects.filter(user_id=user.pk)
+        requests = Requests.objects.filter(Q(user_id=user.pk) & Q(status__in=statuses))
 
     # Get parameters for date range and status from the request
     start_date = request.query_params.get('start_date', None)
@@ -48,6 +50,13 @@ def search_requests(request):
             pass  # or you could return an error message that status must be an integer
 
 
+    # if user.is_moderator == True:
+    #     FilterUser = request.query_params.get('user', None)
+
+    #     filter_user_ids = CustomUser.objects.filter(username__icontains=FilterUser).values_list('id', flat=True)  # Получаем список идентификаторов пользователей
+    #     requests = requests.filter(user__id__in=filter_user_ids)
+
+
     print(start_date)
 
     # Serialize and return response
@@ -58,8 +67,8 @@ def search_requests(request):
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def get_draft_request(request):
-    draft_request = find_draft_request(request)
+def get_draft_request(request, request_id):
+    draft_request = Requests.objects.get(pk=request_id)
 
     if draft_request is None:
         return Response(status=status.HTTP_404_NOT_FOUND)
