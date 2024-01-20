@@ -20,8 +20,8 @@ from app import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.GetOrders, name='order_url'),
-    path('order/<int:id>/', views.GetOrder, name='order_url'),
+    path('', views.GetOrders, name='service_url'),
+    path('service/<int:id>/', views.GetOrder, name='service_url'),
     path('update/<int:id>/', views.ClickRemoveButton, name='card_remove_url'),
 ]
 

@@ -77,7 +77,7 @@ WSGI_APPLICATION = 'bmstu_lab.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'bank',
+        'NAME': 'bank_services',
         'USER': 'admin',
         'PASSWORD': '123',
         'HOST': 'localhost',

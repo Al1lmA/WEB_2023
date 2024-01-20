@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ data.order.title }}{% endblock %}
+{% block title %}{{ data.service.title }}{% endblock %}
 
 {% block content %}
 
@@ -14,7 +14,7 @@
   >
   <div id="inner-wrap">
     <svg
-      class="waves waves-order"
+      class="waves waves-service"
       xmlns="http://www.w3.org/2000/svg"
       width="3000"
       height="321.75"
@@ -54,18 +54,18 @@
 
     <div class="wrapper">
         <figure class="card">
-        <img class="img-order"
-            src="{{data.order.order_img}}"
+        <img class="img-service"
+            src="{{data.service.service_img}}"
             width="640"
             height="640"
             alt=""
         />
         <figcaption>
             <blockquote>
-                {{data.order.title}}
+                {{data.service.title}}
             </blockquote>
             <cite
-                >{{data.order.description}}
+                >{{data.service.description}}
             </cite>
             <p class="credit">
             <strong>Sky Bank</strong>,
