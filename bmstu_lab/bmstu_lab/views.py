@@ -34,26 +34,26 @@ database = [
     # {'id' : 7, 'title' : 'Инвестиции', 'button-text' : 'Открыть брокерский счёт', 'description' : ''},
 ]
 
-def GetOrders(request):
+def GetServices(request):
     try:
         input_text = request.GET['txt']
         if input_text:
-            orders = [order for order in database if input_text.lower() in order['title'].lower()]
-        return render(request, 'orders.html', {'data':{
-            'orders':orders,
+            services = [service for service in database if input_text.lower() in service['title'].lower()]
+        return render(request, 'services.html', {'data':{
+            'services':services,
             'search' : input_text
             }})
     except:
-        return render(request, 'orders.html', {'data' : {
-            'orders': database,
+        return render(request, 'services.html', {'data' : {
+            'services': database,
         }})
 
-def GetOrder(request, id):
+def GetService(request, id):
     for item in database:
         if item['id'] == id:
             current_data = item
-    return render(request, 'order.html', {'data' : {
+    return render(request, 'service.html', {'data' : {
         'id': id,
-        'order' : current_data
+        'service' : current_data
     }})
 

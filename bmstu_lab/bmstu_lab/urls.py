@@ -21,8 +21,8 @@ from bmstu_lab import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     # path('hello/', views.hello),
-    path('', views.GetOrders),
-    path('order/<int:id>/', views.GetOrder, name='order_url'),
+    path('', views.GetServices),
+    path('service/<int:id>/', views.GetService, name='service_url'),
 ]
 
 

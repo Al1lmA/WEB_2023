@@ -7,8 +7,8 @@
 {% block content %}
 
 {% comment %} <ul>
-    {% for order in data.orders %}
-       {% include 'order_element.html' with element=order %}
+    {% for service in data.services %}
+       {% include 'order_element.html' with element=service %}
     {% empty %}
         <li>Список пуст</li>
     {% endfor %}
@@ -65,21 +65,21 @@ viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
 
 
 <div class="box-container">
-    {% for order in data.orders %}
+    {% for service in data.services %}
     <div class="box-item">
     <div class="flip-box">
-    <div class="flip-box-front text-center" style="background-image: url({{order.img}});">
+    <div class="flip-box-front text-center" style="background-image: url({{service.img}});">
         <div class="inner color-white">
-        <h3 class="flip-box-header">{{ order.title }}</h3>
+        <h3 class="flip-box-header">{{ service.title }}</h3>
         <img src="https://s25.postimg.cc/65hsttv9b/cta-arrow.png" alt="" class="flip-box-img">
         </div>
     </div>
-    <div class="flip-box-back text-center" style="background-image: url({{order.img}});">
+    <div class="flip-box-back text-center" style="background-image: url({{service.img}});">
         <div class="inner color-white">
-        <h3 class="flip-box-header">{{ order.title }}</h3>
-        <p>{{ order.short_text}}</p>
-        <form action="{% url 'order_url' order.id %}">
-            <button class="flip-box-button">{{ order.button_text }}</button>
+        <h3 class="flip-box-header">{{ service.title }}</h3>
+        <p>{{ service.short_text}}</p>
+        <form action="{% url 'service_url' service.id %}">
+            <button class="flip-box-button">{{ service.button_text }}</button>
         </form>
         </div>
     </div>
