@@ -52,6 +52,7 @@ urlpatterns = [
     path('accounts/login/', login_view, name='login'),
     path('accounts/logout/', logout_view, name='logout'),
     path('accounts/check/', check, name='check'),
+    path('accounts/registration/', registration_view, name='registration'),
 
     path(r'services/', services),
     path(r'services/search/', search_services),
